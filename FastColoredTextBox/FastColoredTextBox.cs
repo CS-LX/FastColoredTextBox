@@ -1,4 +1,4 @@
-﻿//
+//
 //  THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
 //  KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
 //  IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
@@ -4782,7 +4782,7 @@ namespace FastColoredTextBoxNS
             return needSpaces;
         }
 
-        internal virtual void CalcAutoIndentShiftByCodeFolding(object sender, AutoIndentEventArgs args)
+        public virtual void CalcAutoIndentShiftByCodeFolding(object sender, AutoIndentEventArgs args)
         {
             //inset TAB after start folding marker
             if (string.IsNullOrEmpty(lines[args.iLine].FoldingEndMarker) &&
