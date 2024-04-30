@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
@@ -6,10 +6,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
 
-namespace FastColoredTextBoxNS
-{
-    public class SyntaxHighlighter : IDisposable
-    {
+namespace FastColoredTextBoxNS {
+    public class SyntaxHighlighter : IDisposable {
         //styles
         protected static readonly Platform platformType = PlatformType.GetOperationSystemPlatform();
         public readonly Style BlueBoldStyle = new TextStyle(Brushes.Blue, null, FontStyle.Bold);
@@ -102,7 +100,7 @@ namespace FastColoredTextBoxNS
 
         protected Regex SQLCommentRegex1,
                       SQLCommentRegex2,
-                      SQLCommentRegex3, 
+                      SQLCommentRegex3,
                       SQLCommentRegex4;
 
         protected Regex SQLFunctionsRegex;
@@ -120,10 +118,8 @@ namespace FastColoredTextBoxNS
 
         protected FastColoredTextBox currentTb;
 
-        public static RegexOptions RegexCompiledOption
-        {
-            get
-            {
+        public static RegexOptions RegexCompiledOption {
+            get {
                 if (platformType == Platform.X86)
                     return RegexOptions.Compiled;
                 else
@@ -137,8 +133,7 @@ namespace FastColoredTextBoxNS
 
         #region IDisposable Members
 
-        public void Dispose()
-        {
+        public void Dispose() {
             foreach (SyntaxDescriptor desc in descByXMLfileNames.Values)
                 desc.Dispose();
         }
@@ -148,10 +143,8 @@ namespace FastColoredTextBoxNS
         /// <summary>
         /// Highlights syntax for given language
         /// </summary>
-        public virtual void HighlightSyntax(Language language, Range range)
-        {
-            switch (language)
-            {
+        public virtual void HighlightSyntax(Language language, Range range) {
+            switch (language) {
                 case Language.CSharp:
                     CSharpSyntaxHighlight(range);
                     break;
@@ -187,11 +180,9 @@ namespace FastColoredTextBoxNS
         /// <summary>
         /// Highlights syntax for given XML description file
         /// </summary>
-        public virtual void HighlightSyntax(string XMLdescriptionFile, Range range)
-        {
+        public virtual void HighlightSyntax(string XMLdescriptionFile, Range range) {
             SyntaxDescriptor desc = null;
-            if (!descByXMLfileNames.TryGetValue(XMLdescriptionFile, out desc))
-            {
+            if (!descByXMLfileNames.TryGetValue(XMLdescriptionFile, out desc)) {
                 var doc = new XmlDocument();
                 string file = XMLdescriptionFile;
                 if (!File.Exists(file))
@@ -205,12 +196,10 @@ namespace FastColoredTextBoxNS
             HighlightSyntax(desc, range);
         }
 
-        public virtual void AutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        public virtual void AutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             var tb = (sender as FastColoredTextBox);
             Language language = tb.Language;
-            switch (language)
-            {
+            switch (language) {
                 case Language.CSharp:
                     CSharpAutoIndentNeeded(sender, args);
                     break;
@@ -240,8 +229,7 @@ namespace FastColoredTextBoxNS
             }
         }
 
-        protected void PHPAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void PHPAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             /*
             FastColoredTextBox tb = sender as FastColoredTextBox;
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);*/
@@ -249,14 +237,12 @@ namespace FastColoredTextBoxNS
             if (Regex.IsMatch(args.LineText, @"^[^""']*\{.*\}[^""']*$"))
                 return;
             //start of block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{"))
-            {
+            if (Regex.IsMatch(args.LineText, @"^[^""']*\{")) {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
             //end of block {}
-            if (Regex.IsMatch(args.LineText, @"}[^""']*$"))
-            {
+            if (Regex.IsMatch(args.LineText, @"}[^""']*$")) {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
@@ -270,29 +256,24 @@ namespace FastColoredTextBoxNS
                 }
         }
 
-        protected void SQLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void SQLAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             var tb = sender as FastColoredTextBox;
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
-        protected void HTMLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void HTMLAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             var tb = sender as FastColoredTextBox;
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
-        protected void XMLAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void XMLAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             var tb = sender as FastColoredTextBox;
             tb.CalcAutoIndentShiftByCodeFolding(sender, args);
         }
 
-        protected void VBAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void VBAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             //end of block
-            if (Regex.IsMatch(args.LineText, @"^\s*(End|EndIf|Next|Loop)\b", RegexOptions.IgnoreCase))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(End|EndIf|Next|Loop)\b", RegexOptions.IgnoreCase)) {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
@@ -300,8 +281,7 @@ namespace FastColoredTextBoxNS
             //start of declaration
             if (Regex.IsMatch(args.LineText,
                               @"\b(Class|Property|Enum|Structure|Sub|Function|Namespace|Interface|Get)\b|(Set\s*\()",
-                              RegexOptions.IgnoreCase))
-            {
+                              RegexOptions.IgnoreCase)) {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
@@ -309,55 +289,47 @@ namespace FastColoredTextBoxNS
             if (Regex.IsMatch(args.LineText, @"\b(Then)\s*\S+", RegexOptions.IgnoreCase))
                 return;
             //start of operator block
-            if (Regex.IsMatch(args.LineText, @"^\s*(If|While|For|Do|Try|With|Using|Select)\b", RegexOptions.IgnoreCase))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(If|While|For|Do|Try|With|Using|Select)\b", RegexOptions.IgnoreCase)) {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
 
             //Statements else, elseif, case etc
-            if (Regex.IsMatch(args.LineText, @"^\s*(Else|ElseIf|Case|Catch|Finally)\b", RegexOptions.IgnoreCase))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(Else|ElseIf|Case|Catch|Finally)\b", RegexOptions.IgnoreCase)) {
                 args.Shift = -args.TabLength;
                 return;
             }
 
             //Char _
-            if (args.PrevLineText.TrimEnd().EndsWith("_"))
-            {
+            if (args.PrevLineText.TrimEnd().EndsWith("_")) {
                 args.Shift = args.TabLength;
                 return;
             }
         }
 
-        protected void CSharpAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void CSharpAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             //block {}
             if (Regex.IsMatch(args.LineText, @"^[^""']*\{.*\}[^""']*$"))
                 return;
             //start of block {}
-            if (Regex.IsMatch(args.LineText, @"^[^""']*\{"))
-            {
+            if (Regex.IsMatch(args.LineText, @"^[^""']*\{")) {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
             //end of block {}
-            if (Regex.IsMatch(args.LineText, @"}[^""']*$"))
-            {
+            if (Regex.IsMatch(args.LineText, @"}[^""']*$")) {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
             }
             //label
             if (Regex.IsMatch(args.LineText, @"^\s*\w+\s*:\s*($|//)") &&
-                !Regex.IsMatch(args.LineText, @"^\s*default\s*:"))
-            {
+                !Regex.IsMatch(args.LineText, @"^\s*default\s*:")) {
                 args.Shift = -args.TabLength;
                 return;
             }
             //some statements: case, default
-            if (Regex.IsMatch(args.LineText, @"^\s*(case|default)\b.*:\s*($|//)"))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(case|default)\b.*:\s*($|//)")) {
                 args.Shift = -args.TabLength / 2;
                 return;
             }
@@ -380,8 +352,7 @@ namespace FastColoredTextBoxNS
         /// </summary>
         /// <param name="descriptionFileName">Name of the description file</param>
         /// <param name="doc">XmlDocument to parse</param>
-        public virtual void AddXmlDescription(string descriptionFileName, XmlDocument doc)
-        {
+        public virtual void AddXmlDescription(string descriptionFileName, XmlDocument doc) {
             SyntaxDescriptor desc = ParseXmlDescription(doc);
             descByXMLfileNames[descriptionFileName] = desc;
         }
@@ -393,39 +364,32 @@ namespace FastColoredTextBoxNS
         /// added afterwards and can be used anyway. 
         /// </summary>
         /// <param name="style">Style to add</param>
-        public virtual void AddResilientStyle(Style style)
-        {
+        public virtual void AddResilientStyle(Style style) {
             if (resilientStyles.Contains(style)) return;
             currentTb.CheckStylesBufferSize(); // Prevent buffer overflow
             resilientStyles.Add(style);
         }
 
-        public static SyntaxDescriptor ParseXmlDescription(XmlDocument doc)
-        {
+        public static SyntaxDescriptor ParseXmlDescription(XmlDocument doc) {
             var desc = new SyntaxDescriptor();
             XmlNode brackets = doc.SelectSingleNode("doc/brackets");
-            if (brackets != null)
-            {
+            if (brackets != null) {
                 if (brackets.Attributes["left"] == null || brackets.Attributes["right"] == null ||
-                    brackets.Attributes["left"].Value == "" || brackets.Attributes["right"].Value == "")
-                {
+                    brackets.Attributes["left"].Value == "" || brackets.Attributes["right"].Value == "") {
                     desc.leftBracket = '\x0';
                     desc.rightBracket = '\x0';
                 }
-                else
-                {
+                else {
                     desc.leftBracket = brackets.Attributes["left"].Value[0];
                     desc.rightBracket = brackets.Attributes["right"].Value[0];
                 }
 
                 if (brackets.Attributes["left2"] == null || brackets.Attributes["right2"] == null ||
-                    brackets.Attributes["left2"].Value == "" || brackets.Attributes["right2"].Value == "")
-                {
+                    brackets.Attributes["left2"].Value == "" || brackets.Attributes["right2"].Value == "") {
                     desc.leftBracket2 = '\x0';
                     desc.rightBracket2 = '\x0';
                 }
-                else
-                {
+                else {
                     desc.leftBracket2 = brackets.Attributes["left2"].Value[0];
                     desc.rightBracket2 = brackets.Attributes["right2"].Value[0];
                 }
@@ -438,8 +402,7 @@ namespace FastColoredTextBoxNS
 
             var styleByName = new Dictionary<string, Style>();
 
-            foreach (XmlNode style in doc.SelectNodes("doc/style"))
-            {
+            foreach (XmlNode style in doc.SelectNodes("doc/style")) {
                 Style s = ParseStyle(style);
                 styleByName[style.Attributes["name"].Value] = s;
                 desc.styles.Add(s);
@@ -452,8 +415,7 @@ namespace FastColoredTextBoxNS
             return desc;
         }
 
-        protected static FoldingDesc ParseFolding(XmlNode foldingNode)
-        {
+        protected static FoldingDesc ParseFolding(XmlNode foldingNode) {
             var folding = new FoldingDesc();
             //regex
             folding.startMarkerRegex = foldingNode.Attributes["start"].Value;
@@ -466,8 +428,7 @@ namespace FastColoredTextBoxNS
             return folding;
         }
 
-        protected static RuleDesc ParseRule(XmlNode ruleNode, Dictionary<string, Style> styles)
-        {
+        protected static RuleDesc ParseRule(XmlNode ruleNode, Dictionary<string, Style> styles) {
             var rule = new RuleDesc();
             rule.pattern = ruleNode.InnerText;
             //
@@ -486,8 +447,7 @@ namespace FastColoredTextBoxNS
             return rule;
         }
 
-        protected static Style ParseStyle(XmlNode styleNode)
-        {
+        protected static Style ParseStyle(XmlNode styleNode) {
             XmlAttribute typeA = styleNode.Attributes["type"];
             XmlAttribute colorA = styleNode.Attributes["color"];
             XmlAttribute backColorA = styleNode.Attributes["backColor"];
@@ -508,10 +468,8 @@ namespace FastColoredTextBoxNS
             return new TextStyle(foreBrush, backBrush, fontStyle);
         }
 
-        protected static Color ParseColor(string s)
-        {
-            if (s.StartsWith("#"))
-            {
+        protected static Color ParseColor(string s) {
+            if (s.StartsWith("#")) {
                 if (s.Length <= 7)
                     return Color.FromArgb(255,
                                           Color.FromArgb(Int32.Parse(s.Substring(1), NumberStyles.AllowHexSpecifier)));
@@ -522,8 +480,7 @@ namespace FastColoredTextBoxNS
                 return Color.FromName(s);
         }
 
-        public void HighlightSyntax(SyntaxDescriptor desc, Range range)
-        {
+        public void HighlightSyntax(SyntaxDescriptor desc, Range range) {
             //set style order
             range.tb.ClearStylesBuffer();
             for (int i = 0; i < desc.styles.Count; i++)
@@ -553,21 +510,18 @@ namespace FastColoredTextBoxNS
             RestoreBrackets(range.tb, oldBrackets);
         }
 
-        protected void RestoreBrackets(FastColoredTextBox tb, char[] oldBrackets)
-        {
+        protected void RestoreBrackets(FastColoredTextBox tb, char[] oldBrackets) {
             tb.LeftBracket = oldBrackets[0];
             tb.RightBracket = oldBrackets[1];
             tb.LeftBracket2 = oldBrackets[2];
             tb.RightBracket2 = oldBrackets[3];
         }
 
-        protected char[] RememberBrackets(FastColoredTextBox tb)
-        {
+        protected char[] RememberBrackets(FastColoredTextBox tb) {
             return new[] { tb.LeftBracket, tb.RightBracket, tb.LeftBracket2, tb.RightBracket2 };
         }
 
-        protected void InitCShaprRegex()
-        {
+        protected void InitCShaprRegex() {
             //CSharpStringRegex = new Regex( @"""""|@""""|''|@"".*?""|(?<!@)(?<range>"".*?[^\\]"")|'.*?[^\\]'", RegexCompiledOption);
 
             CSharpStringRegex =
@@ -619,10 +573,8 @@ namespace FastColoredTextBoxNS
                     RegexCompiledOption);
         }
 
-        public void InitStyleSchema(Language lang)
-        {
-            switch (lang)
-            {
+        public virtual void InitStyleSchema(Language lang) {
+            switch (lang) {
                 case Language.CSharp:
                     StringStyle = BrownStyle;
                     CommentStyle = GreenStyle;
@@ -700,8 +652,7 @@ namespace FastColoredTextBoxNS
         /// Highlights C# code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void CSharpSyntaxHighlight(Range range)
-        {
+        public virtual void CSharpSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "//";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -735,8 +686,7 @@ namespace FastColoredTextBoxNS
             range.SetStyle(KeywordStyle, CSharpKeywordRegex);
 
             //find document comments
-            foreach (Range r in range.GetRanges(@"^\s*///.*$", RegexOptions.Multiline))
-            {
+            foreach (Range r in range.GetRanges(@"^\s*///.*$", RegexOptions.Multiline)) {
                 //remove C# highlighting from this fragment
                 r.ClearStyle(StyleIndex.All);
                 //do XML highlighting
@@ -745,14 +695,12 @@ namespace FastColoredTextBoxNS
                 //
                 r.SetStyle(CommentStyle);
                 //tags
-                foreach (Range rr in r.GetRanges(HTMLTagContentRegex))
-                {
+                foreach (Range rr in r.GetRanges(HTMLTagContentRegex)) {
                     rr.ClearStyle(StyleIndex.All);
                     rr.SetStyle(CommentTagStyle);
                 }
                 //prefix '///'
-                foreach (Range rr in r.GetRanges(@"^\s*///", RegexOptions.Multiline))
-                {
+                foreach (Range rr in r.GetRanges(@"^\s*///", RegexOptions.Multiline)) {
                     rr.ClearStyle(StyleIndex.All);
                     rr.SetStyle(CommentTagStyle);
                 }
@@ -766,8 +714,7 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers(@"/\*", @"\*/"); //allow to collapse comment block
         }
 
-        protected void InitVBRegex()
-        {
+        protected void InitVBRegex() {
             VBStringRegex = new Regex(@"""""|"".*?[^\\]""", RegexCompiledOption);
             VBCommentRegex = new Regex(@"'.*$", RegexOptions.Multiline | RegexCompiledOption);
             VBNumberRegex = new Regex(@"\b\d+[\.]?\d*([eE]\-?\d+)?\b", RegexCompiledOption);
@@ -783,8 +730,7 @@ namespace FastColoredTextBoxNS
         /// Highlights VB code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void VBSyntaxHighlight(Range range)
-        {
+        public virtual void VBSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "'";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -829,8 +775,7 @@ namespace FastColoredTextBoxNS
                                     RegexOptions.Multiline | RegexOptions.IgnoreCase);
         }
 
-        protected void InitHTMLRegex()
-        {
+        protected void InitHTMLRegex() {
             HTMLCommentRegex1 = new Regex(@"(<!--.*?-->)|(<!--.*)", RegexOptions.Singleline | RegexCompiledOption);
             HTMLCommentRegex2 = new Regex(@"(<!--.*?-->)|(.*-->)",
                                           RegexOptions.Singleline | RegexOptions.RightToLeft | RegexCompiledOption);
@@ -854,8 +799,7 @@ namespace FastColoredTextBoxNS
         /// Highlights HTML code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void HTMLSyntaxHighlight(Range range)
-        {
+        public virtual void HTMLSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = null;
             range.tb.LeftBracket = '<';
             range.tb.RightBracket = '>';
@@ -896,10 +840,9 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers("<tr", "</tr>", RegexOptions.IgnoreCase);
         }
 
-        protected void InitXMLRegex()
-        {
+        protected void InitXMLRegex() {
             XMLCommentRegex1 = new Regex(@"(<!--.*?-->)|(<!--.*)", RegexOptions.Singleline | RegexCompiledOption);
-            XMLCommentRegex2 = new Regex(@"(<!--.*?-->)|(.*-->)",  RegexOptions.Singleline | RegexOptions.RightToLeft | RegexCompiledOption);
+            XMLCommentRegex2 = new Regex(@"(<!--.*?-->)|(.*-->)", RegexOptions.Singleline | RegexOptions.RightToLeft | RegexCompiledOption);
 
             XMLTagRegex = new Regex(@"<\?|</|>|<|/>|\?>", RegexCompiledOption);
             XMLTagNameRegex = new Regex(@"<[?](?<range1>[x][m][l]{1})|<(?<range>[!\w:\-\.]+)", RegexCompiledOption);
@@ -924,8 +867,7 @@ namespace FastColoredTextBoxNS
         /// Highlights XML code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void XMLSyntaxHighlight(Range range)
-        {
+        public virtual void XMLSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = null;
             range.tb.LeftBracket = '<';
             range.tb.RightBracket = '>';
@@ -937,8 +879,7 @@ namespace FastColoredTextBoxNS
                              XmlEntityStyle, XmlCDataStyle);
 
             //
-            if (XMLTagRegex == null)
-            {
+            if (XMLTagRegex == null) {
                 InitXMLRegex();
             }
 
@@ -974,19 +915,16 @@ namespace FastColoredTextBoxNS
             XmlFolding(range);
         }
 
-        private void XmlFolding(Range range)
-        {
+        private void XmlFolding(Range range) {
             var stack = new Stack<XmlFoldingTag>();
             var id = 0;
             var fctb = range.tb;
             //extract opening and closing tags (exclude open-close tags: <TAG/>)
-            foreach (var r in range.GetRanges(XMLFoldingRegex))
-            {
+            foreach (var r in range.GetRanges(XMLFoldingRegex)) {
                 var tagName = r.Text;
                 var iLine = r.Start.iLine;
                 //if it is opening tag...
-                if (tagName[0] != '/')
-                {
+                if (tagName[0] != '/') {
                     // ...push into stack
                     var tag = new XmlFoldingTag { Name = tagName, id = id++, startLine = r.Start.iLine };
                     stack.Push(tag);
@@ -994,21 +932,17 @@ namespace FastColoredTextBoxNS
                     if (string.IsNullOrEmpty(fctb[iLine].FoldingStartMarker))
                         fctb[iLine].FoldingStartMarker = tag.Marker;
                 }
-                else
-                {
+                else {
                     //if it is closing tag - pop from stack
-                    if (stack.Count > 0)
-                    {
+                    if (stack.Count > 0) {
                         var tag = stack.Pop();
                         //compare line number
-                        if (iLine == tag.startLine)
-                        {
+                        if (iLine == tag.startLine) {
                             //remove marker, because same line can not be folding
                             if (fctb[iLine].FoldingStartMarker == tag.Marker) //was it our marker?
                                 fctb[iLine].FoldingStartMarker = null;
                         }
-                        else
-                        {
+                        else {
                             //set end folding marker
                             if (string.IsNullOrEmpty(fctb[iLine].FoldingEndMarker))
                                 fctb[iLine].FoldingEndMarker = tag.Marker;
@@ -1018,16 +952,14 @@ namespace FastColoredTextBoxNS
             }
         }
 
-        class XmlFoldingTag
-        {
+        class XmlFoldingTag {
             public string Name;
             public int id;
             public int startLine;
             public string Marker { get { return Name + id; } }
         }
 
-        protected void InitSQLRegex()
-        {
+        protected void InitSQLRegex() {
             SQLStringRegex = new Regex(@"""""|''|"".*?[^\\]""|'.*?[^\\]'", RegexCompiledOption);
             SQLNumberRegex = new Regex(@"\b\d+[\.]?\d*([eE]\-?\d+)?\b", RegexCompiledOption);
             SQLCommentRegex1 = new Regex(@"--.*$", RegexOptions.Multiline | RegexCompiledOption);
@@ -1048,8 +980,7 @@ namespace FastColoredTextBoxNS
         /// Highlights SQL code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void SQLSyntaxHighlight(Range range)
-        {
+        public virtual void SQLSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "--";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -1091,8 +1022,7 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers(@"/\*", @"\*/"); //allow to collapse comment block
         }
 
-        protected void InitPHPRegex()
-        {
+        protected void InitPHPRegex() {
             PHPStringRegex = new Regex(@"""""|''|"".*?[^\\]""|'.*?[^\\]'", RegexCompiledOption);
             PHPNumberRegex = new Regex(@"\b\d+[\.]?\d*\b", RegexCompiledOption);
             PHPCommentRegex1 = new Regex(@"(//|#).*$", RegexOptions.Multiline | RegexCompiledOption);
@@ -1116,8 +1046,7 @@ namespace FastColoredTextBoxNS
         /// Highlights PHP code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void PHPSyntaxHighlight(Range range)
-        {
+        public virtual void PHPSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "//";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -1158,8 +1087,7 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers(@"/\*", @"\*/"); //allow to collapse comment block
         }
 
-        protected void InitJScriptRegex()
-        {
+        protected void InitJScriptRegex() {
             JScriptStringRegex = new Regex(@"""""|''|"".*?[^\\]""|'.*?[^\\]'", RegexCompiledOption);
             JScriptCommentRegex1 = new Regex(@"//.*$", RegexOptions.Multiline | RegexCompiledOption);
             JScriptCommentRegex2 = new Regex(@"(/\*.*?\*/)|(/\*.*)", RegexOptions.Singleline | RegexCompiledOption);
@@ -1177,8 +1105,7 @@ namespace FastColoredTextBoxNS
         /// Highlights JavaScript code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void JScriptSyntaxHighlight(Range range)
-        {
+        public virtual void JScriptSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "//";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -1213,8 +1140,7 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers(@"/\*", @"\*/"); //allow to collapse comment block
         }
 
-        protected void InitLuaRegex()
-        {
+        protected void InitLuaRegex() {
             LuaStringRegex = new Regex(@"""""|''|"".*?[^\\]""|'.*?[^\\]'", RegexCompiledOption);
             LuaCommentRegex1 = new Regex(@"--.*$", RegexOptions.Multiline | RegexCompiledOption);
             LuaCommentRegex2 = new Regex(@"(--\[\[.*?\]\])|(--\[\[.*)", RegexOptions.Singleline | RegexCompiledOption);
@@ -1237,8 +1163,7 @@ namespace FastColoredTextBoxNS
         /// Highlights Lua code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void LuaSyntaxHighlight(Range range)
-        {
+        public virtual void LuaSyntaxHighlight(Range range) {
             range.tb.CommentPrefix = "--";
             range.tb.LeftBracket = '(';
             range.tb.RightBracket = ')';
@@ -1275,11 +1200,9 @@ namespace FastColoredTextBoxNS
             range.SetFoldingMarkers(@"--\[\[", @"\]\]"); //allow to collapse comment block
         }
 
-        protected void LuaAutoIndentNeeded(object sender, AutoIndentEventArgs args)
-        {
+        protected void LuaAutoIndentNeeded(object sender, AutoIndentEventArgs args) {
             //end of block
-            if (Regex.IsMatch(args.LineText, @"^\s*(end|until)\b"))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(end|until)\b")) {
                 args.Shift = -args.TabLength;
                 args.ShiftNextLines = -args.TabLength;
                 return;
@@ -1288,22 +1211,19 @@ namespace FastColoredTextBoxNS
             if (Regex.IsMatch(args.LineText, @"\b(then)\s*\S+"))
                 return;
             //start of operator block
-            if (Regex.IsMatch(args.LineText, @"^\s*(function|do|for|while|repeat|if)\b"))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(function|do|for|while|repeat|if)\b")) {
                 args.ShiftNextLines = args.TabLength;
                 return;
             }
 
             //Statements else, elseif, case etc
-            if (Regex.IsMatch(args.LineText, @"^\s*(else|elseif)\b", RegexOptions.IgnoreCase))
-            {
+            if (Regex.IsMatch(args.LineText, @"^\s*(else|elseif)\b", RegexOptions.IgnoreCase)) {
                 args.Shift = -args.TabLength;
                 return;
             }
         }
 
-        protected void InitJSONRegex()
-        {
+        protected void InitJSONRegex() {
             JSONStringRegex = new Regex(@"""([^\\""]|\\"")*""", RegexCompiledOption);
             JSONNumberRegex = new Regex(@"\b(\d+[\.]?\d*|true|false|null)\b", RegexCompiledOption);
             JSONKeywordRegex = new Regex(@"(?<range>""([^\\""]|\\"")*"")\s*:", RegexCompiledOption);
@@ -1313,8 +1233,7 @@ namespace FastColoredTextBoxNS
         /// Highlights JSON code
         /// </summary>
         /// <param name="range"></param>
-        public virtual void JSONSyntaxHighlight(Range range)
-        {
+        public virtual void JSONSyntaxHighlight(Range range) {
             range.tb.LeftBracket = '[';
             range.tb.RightBracket = ']';
             range.tb.LeftBracket2 = '{';
@@ -1467,8 +1386,7 @@ namespace FastColoredTextBoxNS
     /// <summary>
     /// Language
     /// </summary>
-    public enum Language
-    {
+    public enum Language {
         Custom,
         CSharp,
         VB,
